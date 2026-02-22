@@ -1,0 +1,21 @@
+Country,ISO3,Year,PeopleInNeed_M,RequiredFunding_M_USD,FundingReceived_M_USD,CBPFAllocation_M_USD,Severity,PrimaryCluster,Region,Lat,Lon
+Afghanistan,AFG,2023,28.3,3231,1566,89,4,Food Security,Asia,33.0,65.0
+Syria,SYR,2023,15.3,5426,3044,45,4,Protection,Middle East,35.0,38.0
+Yemen,YEM,2023,21.6,4338,2403,67,4,Food Security,Middle East,15.6,48.5
+Ethiopia,ETH,2023,20.1,2571,1089,78,3,Food Security,East Africa,9.1,40.5
+Sudan,SDN,2023,18.0,2571,583,34,4,WASH,East Africa,12.9,30.2
+Ukraine,UKR,2023,14.6,4284,3890,12,3,Shelter,Europe,49.0,31.2
+Somalia,SOM,2023,7.8,2597,1089,91,4,Food Security,East Africa,5.2,46.2
+DRC,COD,2023,23.4,2647,982,112,4,Health,Central Africa,-4.0,21.8
+Myanmar,MMR,2023,17.6,980,334,28,3,Protection,Asia,19.2,96.7
+Haiti,HTI,2023,5.5,720,354,67,3,Food Security,Americas,18.9,-72.3
+CAR,CAF,2023,3.4,528,196,45,3,Nutrition,Central Africa,6.6,20.9
+Chad,TCD,2023,6.9,680,267,38,3,Food Security,West Africa,15.5,18.7
+Niger,NER,2023,4.3,459,169,29,3,WASH,West Africa,17.6,8.1
+Mali,MLI,2023,8.8,578,213,31,3,Food Security,West Africa,17.6,-2.0
+Libya,LBY,2023,1.4,247,104,18,2,Health,North Africa,26.3,17.2
+Venezuela,VEN,2023,7.1,185,78,8,2,Food Security,Americas,6.4,-66.6
+Iraq,IRQ,2023,5.5,573,352,42,3,WASH,Middle East,33.2,43.7
+Palestine,PSE,2023,2.7,1200,710,15,4,Shelter,Middle East,31.9,35.2
+Pakistan,PAK,2023,14.6,816,492,23,3,WASH,Asia,30.4,69.3
+Mozambique,MOZ,2023,2.1,278,134,19,2,Health,East Africa,-18.7,35.5

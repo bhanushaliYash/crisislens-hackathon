@@ -1,0 +1,156 @@
+name: CrisisLens CI — Validate Notebooks & Data
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  validate-syntax:
+    name: Validate Python Notebook Syntax
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python 3.10
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.10'
+
+      - name: Install validation dependencies
+        run: pip install pyflakes
+
+      - name: Validate all notebooks for Python syntax errors
+        run: |
+          echo "🔍 Checking notebook syntax..."
+          python << 'EOF'
+          import ast, sys, os
+
+          notebooks_dir = 'notebooks'
+          errors = []
+          checked = 0
+
+          for filename in sorted(os.listdir(notebooks_dir)):
+              if not filename.endswith('.py'):
+                  continue
+
+              path = os.path.join(notebooks_dir, filename)
+              with open(path, 'r', encoding='utf-8') as f:
+                  content = f.read()
+
+              # Strip Databricks magic lines (# MAGIC %md, # COMMAND ----------)
+              # These are Databricks-specific and not valid Python
+              clean_lines = []
+              for line in content.split('\n'):
+                  stripped = line.strip()
+                  if stripped.startswith('# MAGIC'):
+                      clean_lines.append('# ' + stripped)  # Keep as comment
+                  elif stripped == '# COMMAND ----------':
+                      clean_lines.append('')  # Replace with blank line
+                  else:
+                      clean_lines.append(line)
+
+              clean_code = '\n'.join(clean_lines)
+
+              try:
+                  ast.parse(clean_code)
+                  print(f'  ✅ {filename}')
+                  checked += 1
+              except SyntaxError as e:
+                  errors.append(f'❌ {filename}: Line {e.lineno}: {e.msg}')
+
+          print(f'\nChecked {checked} notebooks')
+
+          if errors:
+              print('\nSyntax errors found:')
+              for err in errors:
+                  print(f'  {err}')
+              sys.exit(1)
+          else:
+              print('✅ All notebooks passed syntax validation!')
+          EOF
+
+  validate-data:
+    name: Validate Sample Data
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v4
+        with:
+          python-version: '3.10'
+      - run: pip install pandas
+
+      - name: Validate sample data integrity
+        run: |
+          python << 'EOF'
+          import pandas as pd
+          import sys
+
+          print("🔍 Validating sample_data.csv...")
+          df = pd.read_csv('data/sample_data.csv')
+
+          errors = []
+
+          # Check required columns exist
+          required_cols = ['Country', 'ISO3', 'Year', 'PeopleInNeed_M',
+                          'RequiredFunding_M_USD', 'FundingReceived_M_USD', 'Severity']
+          for col in required_cols:
+              if col not in df.columns:
+                  errors.append(f'Missing required column: {col}')
+
+          # Check data quality
+          if df['PeopleInNeed_M'].min() <= 0:
+              errors.append('People in Need must be > 0')
+          if df['RequiredFunding_M_USD'].min() <= 0:
+              errors.append('Required Funding must be > 0')
+          if not df['Severity'].between(1, 4).all():
+              errors.append('Severity must be between 1 and 4')
+          if df['ISO3'].str.len().ne(3).any():
+              errors.append('All ISO3 codes must be exactly 3 characters')
+
+          print(f'  Rows: {len(df)}')
+          print(f'  Columns: {list(df.columns)}')
+
+          if errors:
+              for err in errors:
+                  print(f'  ❌ {err}')
+              sys.exit(1)
+          else:
+              print('  ✅ Data validation passed!')
+          EOF
+
+  validate-docs:
+    name: Validate Documentation
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Check all docs exist
+        run: |
+          echo "📚 Checking documentation..."
+          files=(
+            "README.md"
+            "docs/METHODOLOGY.md"
+            "docs/DATA_DICTIONARY.md"
+            "requirements.txt"
+            "notebooks/00_setup_and_config.py"
+            "notebooks/01_data_ingestion.py"
+            "notebooks/02_data_cleaning.py"
+            "notebooks/03_gap_scoring.py"
+            "notebooks/04_outlier_benchmarking.py"
+            "notebooks/05_visualization.py"
+            "notebooks/06_databricks_sql_queries.sql"
+            "data/sample_data.csv"
+          )
+          all_good=true
+          for file in "${files[@]}"; do
+            if [ -f "$file" ]; then
+              echo "  ✅ $file"
+            else
+              echo "  ❌ MISSING: $file"
+              all_good=false
+            fi
+          done
+          if [ "$all_good" = false ]; then exit 1; fi
+          echo "✅ All required files present!"
